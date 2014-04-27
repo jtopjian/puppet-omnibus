@@ -2,7 +2,7 @@ class PuppetGem < FPM::Cookery::Recipe
   description 'Puppet gem stack'
 
   name 'puppet'
-  version '3.3.2'
+  version '3.5.1'
 
   source "nothing", :with => :noop
 
@@ -18,9 +18,9 @@ class PuppetGem < FPM::Cookery::Recipe
 
   def build
     # Install gems using the gem command from destdir
-    gem_install 'facter',      '1.7.3'
+    gem_install 'facter',      '2.0.1'
     gem_install 'json_pure',   '1.8.0'
-    gem_install 'hiera',       '1.3.0'
+    gem_install 'hiera',       '1.3.2'
     gem_install 'deep_merge',  '1.0.0'
     gem_install 'rgen',        '0.6.5'
     gem_install 'ruby-augeas', '0.4.1'

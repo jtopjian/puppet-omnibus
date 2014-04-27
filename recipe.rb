@@ -3,9 +3,9 @@ class PuppetOmnibus < FPM::Cookery::Recipe
 
   section 'Utilities'
   name 'puppet-omnibus'
-  version '3.3.2'
+  version '3.5.1'
   description 'Puppet Omnibus package'
-  revision 0
+  revision 1
   vendor 'fpm'
   maintainer '<github@tinycat.co.uk>'
   license 'Apache 2.0 License'
@@ -15,6 +15,7 @@ class PuppetOmnibus < FPM::Cookery::Recipe
   omnibus_package true
   omnibus_dir     "/opt/#{name}"
   omnibus_recipes 'libyaml',
+                  'readline',
                   'ruby',
                   'puppet'
 
