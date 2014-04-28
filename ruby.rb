@@ -16,7 +16,6 @@ class Ruby193 < FPM::Cookery::Recipe
 
   platforms [:ubuntu, :debian] do
     build_depends 'autoconf',
-                  'libreadline6-dev',
                   'bison',
                   'zlib1g-dev',
                   'libssl-dev',
@@ -26,7 +25,6 @@ class Ruby193 < FPM::Cookery::Recipe
                   'libgdbm-dev'
     depends 'libffi6',
             'libncurses5',
-            'libreadline6',
             'libssl1.0.0',
             'libtinfo5',
             'zlib1g',
@@ -63,6 +61,53 @@ class Ruby193 < FPM::Cookery::Recipe
     rm_f "#{destdir}/lib/libruby-static.a"
     safesystem "strip #{destdir}/bin/ruby"
     safesystem "find #{destdir} -name '*.so' -or -name '*.so.*' | xargs strip"
+
+    # Symlink binaries to PATH using update-alternatives
+    with_trueprefix do
+      create_post_install_hook
+      create_pre_uninstall_hook
+    end
+
   end
+
+  def create_post_install_hook
+    File.open(builddir('post-install'), 'w', 0755) do |f|
+      f.write <<-__POSTINST
+#!/bin/sh
+set -e
+
+BIN_PATH="#{destdir}/bin"
+BINS="ruby gem"
+
+for BIN in $BINS; do
+  update-alternatives --install /usr/bin/$BIN $BIN $BIN_PATH/$BIN 100
+done
+
+exit 0
+      __POSTINST
+    end
+  end
+
+  def create_pre_uninstall_hook
+    File.open(builddir('pre-uninstall'), 'w', 0755) do |f|
+      f.write <<-__PRERM
+#!/bin/sh
+set -e
+
+BIN_PATH="#{destdir}/bin"
+BINS="ruby gem"
+
+if [ "$1" != "upgrade" ]; then
+  for BIN in $BINS; do
+    update-alternatives --remove $BIN $BIN_PATH/$BIN
+  done
+fi
+
+exit 0
+      __PRERM
+    end
+  end
+
+
 end
 
