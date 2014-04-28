@@ -42,12 +42,6 @@ class PuppetGem < FPM::Cookery::Recipe
     destdir('../bin').install workdir('omnibus.bin'), 'puppet'
     destdir('../bin').install workdir('omnibus.bin'), 'facter'
     destdir('../bin').install workdir('omnibus.bin'), 'hiera'
-
-    # Symlink binaries to PATH using update-alternatives
-    with_trueprefix do
-      create_post_install_hook
-      create_pre_uninstall_hook
-    end
   end
 
   private
@@ -88,44 +82,6 @@ class PuppetGem < FPM::Cookery::Recipe
       etc('init.d').install builddir('client.init') => 'puppet'
       etc('sysconfig').install builddir('client.sysconfig') => 'puppet'
       chmod 0755, etc('init.d/puppet')
-    end
-  end
-
-  def create_post_install_hook
-    File.open(builddir('post-install'), 'w', 0755) do |f|
-      f.write <<-__POSTINST
-#!/bin/sh
-set -e
-
-BIN_PATH="#{destdir}/bin"
-BINS="puppet facter hiera"
-
-for BIN in $BINS; do
-  update-alternatives --install /usr/bin/$BIN $BIN $BIN_PATH/$BIN 100
-done
-
-exit 0
-      __POSTINST
-    end
-  end
-
-  def create_pre_uninstall_hook
-    File.open(builddir('pre-uninstall'), 'w', 0755) do |f|
-      f.write <<-__PRERM
-#!/bin/sh
-set -e
-
-BIN_PATH="#{destdir}/bin"
-BINS="puppet facter hiera"
-
-if [ "$1" != "upgrade" ]; then
-  for BIN in $BINS; do
-    update-alternatives --remove $BIN $BIN_PATH/$BIN
-  done
-fi
-
-exit 0
-      __PRERM
     end
   end
 
